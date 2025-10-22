@@ -43,8 +43,9 @@ for angle in angles:
 ij = np.unravel_index(np.argmax(best_match), best_match.shape)
 x, y, = ij[::-1]
 
-#find threshold
-
+#find threshold from mean + k*std
+threshold = np.mean(best_match) + 2 * np.std(best_match)
+match_mask = best_match > threshold
 
 #plotting
 
