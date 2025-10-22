@@ -50,3 +50,15 @@ plt.imshow(noisy_img, cmap='gray')
 plt.title('Greyscale Image with Gaussian Noise')
 plt.axis('off')
 plt.show()
+
+#part c
+#apply sobel edge detector
+edges_sobel = sk.filters.sobel(noisy_img)
+
+#appky prewitt edge detector
+edges_prewitt = sk.filters.prewitt(noisy_img)
+
+# apply canny
+edges_canny = sk.feature.canny(noisy_img, sigma=1)
+
+
