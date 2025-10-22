@@ -61,4 +61,20 @@ edges_prewitt = sk.filters.prewitt(noisy_img)
 # apply canny
 edges_canny = sk.feature.canny(noisy_img, sigma=1)
 
+# displaying results
+plt.figure(figsize=(5, 5))
+plt.imshow(edges_sobel, cmap='gray')
+plt.title('Edges Sobel')
+plt.axis('off')
 
+plt.figure(figsize=(5, 5))
+plt.imshow(edges_prewitt, cmap='gray')
+plt.title('Edges Prewitt')
+plt.axis('off')
+
+plt.figure(figsize=(5, 5))
+plt.imshow(edges_canny, cmap='gray')
+plt.title('Edges Canny')
+plt.axis('off')
+
+plt.show()
