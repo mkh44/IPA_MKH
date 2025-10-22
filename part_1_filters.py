@@ -33,3 +33,12 @@ plt.imshow(grey_img, cmap='gray')
 plt.title('Resized Greyscale Image')
 plt.axis('off')
 plt.show()
+
+#min, max and mean values
+min_val = np.min(grey_img)
+max_val = np.max(grey_img)
+mean_val = np.mean(grey_img)
+
+print(f'min_val: {min_val:.4f}')
+print(f'max_val: {max_val:.4f}')
+print(f'mean_val: {mean_val:.4f}')
