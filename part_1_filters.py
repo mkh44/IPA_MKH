@@ -1,4 +1,4 @@
-
+#part a
 import numpy as np
 import matplotlib.pyplot as plt
 import skimage as sk
@@ -42,3 +42,11 @@ mean_val = np.mean(grey_img)
 print(f'min_val: {min_val:.4f}')
 print(f'max_val: {max_val:.4f}')
 print(f'mean_val: {mean_val:.4f}')
+
+#adding GAUSSIAN part b
+noisy_img = sk.util.random_noise(grey_img, mode='gaussian', mean=0.0, var=0.04)
+plt.figure(figsize=(5, 5))
+plt.imshow(noisy_img, cmap='gray')
+plt.title('Greyscale Image with Gaussian Noise')
+plt.axis('off')
+plt.show()
