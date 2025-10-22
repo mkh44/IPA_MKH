@@ -10,10 +10,21 @@ img = sk.io.imread('my_face.jpg')
 img_resized = sk.transform.resize(img, (512, 512), anti_aliasing=True)
 
 #converting to greyscale
-gray_img = sk.color.rgb2gray(img_resized)
+grey_img = sk.color.rgb2gray(img_resized)
 
 #desplaying images
-plt.plot(img)
-plt.plot(img_resized)
-plt.plot(gray_img)
+plt.figure(figsize=(5, 5))
+plt.imshow(img)
+plt.title('Original Image')
+plt.axis('off')
+
+plt.figure(figsize=(5, 5))
+plt.imshow(img_resized)
+plt.title('Resized RGB Image')
+plt.axis('off')
+
+plt.figure(figsize=(5, 5))
+plt.imshow(grey_img)
+plt.title('Resized Greyscale Image')
+plt.axis('off')
 plt.show()
