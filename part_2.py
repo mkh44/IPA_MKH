@@ -48,4 +48,16 @@ threshold = np.mean(best_match) + 2 * np.std(best_match)
 match_mask = best_match > threshold
 
 #plotting
+fig, ax = plt.subplots(1, 2, figsize=(12, 6))
+ax[0].imshow(sk.transform.rotate(source, best_angle, resize=False))
+ax[0].set_title(f'Best match at {best_angle:.1f} degrees')
+rect = plt.Rectangle((x, y), template.shape[1], template.shape[0], edgecolor='red', facecolor='none', linewidth=2)
+ax[0].add_patch(rect)
 
+ax[1].imshow(best_match, cmap='viridis')
+ax[1].set_title('Template Match Correlation Map')
+
+for a in ax:
+    a.axis('off')
+plt.tight_layout()
+plt.show()
