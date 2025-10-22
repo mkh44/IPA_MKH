@@ -21,16 +21,18 @@ template_smooth = sk.filters.gaussian(template_grey, sigma=sigma_template)
 source_smooth = sk.exposure.rescale_intensity(source_smooth, out_range=(0, 1))
 template_smooth = sk.exposure.rescale_intensity(template_smooth, out_range=(0, 1))
 
+#edge detection
+source_edges = sk.feature.canny(source)
 
 #automated template matching with rotation (to do)
 
-angles = np.arange(0, 360, 10)
+angles = np.arange(0, 360, 15) #checking every 15 degrees
 best_score = -np.inf
 best_match = None
 best_angle = None
 
 for angle in angles:
-    rotated = sk.transform.rotate(source_smooth, angle, resize=False)
+    rotated = sk.transform.rotate(source_smooth, angle, resize=True)
     result = sk.feature.match_template(rotated, template_smooth, pad_input=True)
     score = np.max(result)
 
