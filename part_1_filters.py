@@ -2,9 +2,14 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import skimage as sk
+import PIL as pil
 
-# loading image
-img = sk.io.imread('my_face.jpg')
+#correcting image orrientation
+img_pil = pil.Image.open('my_face.jpg')
+img_pil = pil.ImageOps.exif_transpose(img_pil)
+
+img = np.array(img_pil)
+
 
 #resizing image
 img_resized = sk.transform.resize(img, (512, 512), anti_aliasing=True)
