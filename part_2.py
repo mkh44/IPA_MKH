@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import skimage as sk
 
 #load images
+source = sk.io.imread('avian_blood.jpg')
 
 #convert to greyscale
 
