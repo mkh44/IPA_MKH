@@ -29,7 +29,7 @@ plt.title('Resized RGB Image')
 plt.axis('off')
 
 plt.figure(figsize=(5, 5))
-plt.imshow(grey_img)
+plt.imshow(grey_img, cmap='gray')
 plt.title('Resized Greyscale Image')
 plt.axis('off')
 plt.show()
