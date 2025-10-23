@@ -33,6 +33,15 @@ result = match_template(source_edges_small, template_edges_small)
 all_scores = result.ravel()
 adaptive_threshold = np.mean(all_scores) + 2 * np.std(all_scores)
 
+# peak detection
+peaks = peak_local_max(result, min_distance=10, threshold_abs=adaptive_threshold)
+
+# scaling
+scaled_results = [(int(y/scale_factor), int(x/scale_factor), int(template_edges.shape[0]), int(template_edges.shape[1]))
+                  for (y, x) in peaks]
+
+
+source_detected = source.copy()
 
 
 
