@@ -1,9 +1,11 @@
 #PART 2B
 import numpy as np
 import matplotlib.pyplot as plt
-from skimage import io, color, feature, transform, exposure
+from skimage import io, color, feature, transform, exposure, filters
 from skimage.feature import match_template, peak_local_max
 from skimage.draw import rectangle_perimeter
+from skimage.transform import rotate
+from skipy.stats import median_abs_deviation
 
 #load images
 source = io.imread('avian_blood.jpg')
@@ -13,13 +15,33 @@ template = io.imread('avian_blood_template.jpg')
 source_grey = color.rgb2gray(source)
 template_grey = color.rgb2gray(template)
 
-#normalise images to reduce noise
-source_grey = exposure.equalize_hist(source_grey)
-template_grey = exposure.equalize_hist(template_grey)
+#PARAMETERS FROM IMAGE
+#adaptive clip lim form img size
+source_clip_limit = 0.005 * source_grey.size / 256
+template_clip_limit = 0.005 * template_grey.size / 256
+
+#estemated noise level (median abs more robust than std
+source_noise = median_abs_deviation(source_grey.flatten())
+template_noise = median_abs_deviation(template_grey.flatten())
+
+#sigma for gaussian filter. set as proportional to noise level
+
+#noise reduction (adaptive)
+source_eq = exposure.equalize_adapthist(source_grey, clip_limit=0.03)
+template_eq = exposure.equalize_adapthist(template_grey, clip_limit=0.03)
+
+#gaussian noise reduction
+source_smooth = filters.gaussian(source_eq, sigma=1)
+template_smooth = filters.gaussian(template_eq, sigma=1)
 
 #edge detection
-source_edges = feature.canny(source_grey, sigma=2)
-template_edges = feature.canny(template_grey, sigma=2)
+source_edges = feature.canny(source_smooth, sigma=2)
+template_edges = feature.canny(template_smooth, sigma=2)
+
+#edges + intensities
+source_combined = 0.5 * source_eq + 0.5 * source_edges
+template_combined = 0.5 * template_eq + 0.5 * template_edges
+
 
 #speed
 # scale_factor = 0.9
