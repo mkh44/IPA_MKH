@@ -48,10 +48,11 @@ for (y, x, h, w) in scaled_results:
     source_detected[rr, cc] = (255, 0, 0)
 
 
-fig, ax = plt.subplots(1, figsize=(15, 6))
+fig, ax = plt.subplots(1, figsize=(8, 6))
 plt.imshow(source_detected)
 plt.title(f"All Detections (threshold={adaptive_threshold:.2f})")
 plt.axis('off')
+plt.tight_layout()
 plt.show()
 
 
