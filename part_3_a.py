@@ -13,7 +13,7 @@ img_grey = color.rgb2gray(img_resized)
 
 #DENOISE
 #enhance local contrast
-img_eq = exposure.equalize_adapthist(img_resized, clip_limit=0.03)
+img_eq = exposure.equalize_adapthist(img_grey, clip_limit=0.03)
 
 #gaussian
 sigma = max(1, (min(img_eq.shape) / 512) * 1.5)
@@ -31,8 +31,12 @@ binary_cleaned = morphology.remove_small_holes(binary_cleaned, area_threshold=10
 distance = ndi.distance_transform_edt(binary_cleaned)
 
 #local max and min
-footprint_size = int(np.mean(img_eq.shape) / 50)
-local_max = morphology.local_maxima(distance, footprint=morphology.disk(footprint_size))
+footprint_size = int((np.clip(np.mean(img_eq.shape) / 50, 3, 25)))
+if footprint_size % 2 == 0:
+    footprint_size += 1
+footprint = np.ones((footprint_size, footprint_size), dtype=bool)
+
+local_max = morphology.local_maxima(distance, footprint=footprint)
 
 markers, _ = ndi.label(local_max)
 labels = morphology.watershed(-distance, markers, mask=binary_cleaned)
@@ -43,5 +47,15 @@ labels_no_border = segmentation.clear_border(labels)
 #count labelled regions
 regions = measure.regionprops(labels_no_border)
 cell_count = len(regions)
+
+print(f"Total number of HeLa cells (excluding boundary cells): {cell_count}")
+
+#plotting
+plt.figure(figsize=(10, 10))
+plt.imshow(color.label2rgb(labels_no_border, bg_label=0))
+plt.title(f'Final Segmentation (Count = {cell_count})')
+plt.axis('off')
+plt.tight_layout()
+plt.show()
 
 
