@@ -5,6 +5,7 @@ from skimage import io, color, feature, transform, exposure, filters
 from skimage.feature import match_template, peak_local_max
 from skimage.draw import rectangle_perimeter
 from skimage.transform import rotate
+from skipy import stats
 from skipy.stats import median_abs_deviation
 
 #load images
@@ -25,10 +26,16 @@ source_noise = median_abs_deviation(source_grey.flatten())
 template_noise = median_abs_deviation(template_grey.flatten())
 
 #sigma for gaussian filter. set as proportional to noise level
+gaussian_sigma_source = max(1, int(source_noise * 2))
+gaussian_sigma_template = max(1, int(template_noise * 2))
+
+min_distance_factor = 0.8
+adaptive_min_distance = int(min(template_grey.shape) * min_distance_factor)
+adaptive_min_distance = max(1, adaptive_min_distance)
 
 #noise reduction (adaptive)
-source_eq = exposure.equalize_adapthist(source_grey, clip_limit=0.03)
-template_eq = exposure.equalize_adapthist(template_grey, clip_limit=0.03)
+source_eq = exposure.equalize_adapthist(source_grey, clip_limit=source_clip_limit,)
+template_eq = exposure.equalize_adapthist(template_grey, clip_limit=template_clip_limit,)
 
 #gaussian noise reduction
 source_smooth = filters.gaussian(source_eq, sigma=1)
