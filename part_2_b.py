@@ -16,3 +16,7 @@ template_grey = color.rgb2gray(template)
 #normalise images to reduce noise
 source_grey = exposure.equalize_hist(source_grey)
 template_grey = exposure.equalize_hist(template_grey)
+
+#edge detection
+source_edges = feature.canny(source_grey, sigma=2)
+template_edges = feature.canny(template_grey, sigma=2)
