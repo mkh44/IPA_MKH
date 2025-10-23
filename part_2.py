@@ -14,12 +14,12 @@ source_grey = color.rgb2gray(source)
 template_grey = color.rgb2gray(template)
 
 #normalise images to reduce noise
-source_norm = exposure.equalize_hist(source_grey)
-template_norm = exposure.equalize_hist(template_grey)
+source_grey = exposure.equalize_hist(source_grey)
+template_grey = exposure.equalize_hist(template_grey)
 
 #edge detection
-source_edges = feature.canny(source_norm, sigma=2)
-template_edges = feature.canny(template_norm, sigma=2)
+source_edges = feature.canny(source_grey, sigma=2)
+template_edges = feature.canny(template_grey, sigma=2)
 
 #rotation invariance
 angles = np.arange(0, 360, 15) #checking every 15 degrees
@@ -27,8 +27,8 @@ best_score = []
 threshold = 0.3
 
 for angle in angles:
-    rotated_template = transform.rotate(template_norm, angle, resize=True)
-    result = feature.match_template(source_norm, rotated_template)
+    rotated_template = transform.rotate(template_edges, angle, resize=True)
+    result = match_template(source_edges, rotated_template)
     score = np.max(result)
 
     #peaks
@@ -44,8 +44,9 @@ for (y, x, h, w, score) in best_score:
     source_detected[rr, cc] = (255, 0, 0)#red box thing
 
 #plotting
-fig, ax = plt.subplots(1, figsize=(15, 6))
+plt.figure(figsize=(8, 6))
 plt.imshow(source_detected)
 plt.title('Detections (red boxes)')
 plt.axis('off')
+plt.tight_layout()
 plt.show()
