@@ -38,8 +38,10 @@ markers, _ = ndi.label(local_max)
 labels = morphology.watershed(-distance, markers, mask=binary_cleaned)
 
 #remove boundary touching objects
+labels_no_border = segmentation.clear_border(labels)
 
 #count labelled regions
-
+regions = measure.regionprops(labels_no_border)
+cell_count = len(regions)
 
 
