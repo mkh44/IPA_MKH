@@ -38,7 +38,12 @@ print(f'max_val: {max_val:.4f}')
 print(f'mean_val: {mean_val:.4f}')
 
 #PART 1B: ADDING GAUSSIAN
-noisy_img = sk.util.random_noise(grey_img, mode='gaussian', mean=0.0, var=0.04)
+mean = 0.0
+variance = 0.04
+sigma = np.sqrt(variance)
+gaussian_noise = np.random.normal(mean, sigma, grey_img.shape)
+noisy_img = grey_img + gaussian_noise
+noisy_img = np.clip(noisy_img, 0, 255).astype(np.unit8)
 plt.figure(figsize=(5, 5))
 plt.imshow(noisy_img, cmap='gray')
 plt.title('Greyscale Image with Gaussian Noise')
