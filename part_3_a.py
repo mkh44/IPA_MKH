@@ -14,13 +14,15 @@ img_grey = color.rgb2gray(img_resized)
 
 #DENOISE
 #enhance local contrast
-image_eq = exposure.equalize_adapthist(img_resized, clip_limit=0.03)
+img_eq = exposure.equalize_adapthist(img_resized, clip_limit=0.03)
 
 #gaussian
-
-# enhance contrast#
+sigma = max(1, (min(img_eq.shape) / 512) * 1.5)
+img_smooth = filters.gaussian(img_eq, sigma=sigma)
 
 #thresholding
+threshold_value = filters.threshold_otsu(img_smooth)
+binary = img_smooth > threshold_value
 
 #remove small noise and fill small holes
 
