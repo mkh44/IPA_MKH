@@ -22,28 +22,28 @@ source_edges = feature.canny(source_grey, sigma=2)
 template_edges = feature.canny(template_grey, sigma=2)
 
 #speed
-scale_factor = 0.9
-source_edges_small = transform.rescale(source_edges, scale_factor, anti_aliasing=False)
-template_edges_small = transform.rescale(template_edges, scale_factor, anti_aliasing=False)
+# scale_factor = 0.9
+# source_edges_small = transform.rescale(source_edges, scale_factor, anti_aliasing=False)
+# template_edges_small = transform.rescale(template_edges, scale_factor, anti_aliasing=False)
 
 # template matching (no rotation)
-result = match_template(source_edges_small, template_edges_small)
+result = match_template(source_edges, template_edges)
 
 # adaptive threshold selection
 all_scores = np.ravel(result)
 adaptive_threshold = np.mean(all_scores) + 2 * np.std(all_scores)
 
 # peak detection
-peaks = peak_local_max(result, min_distance=10, threshold_abs=adaptive_threshold)
-
+peaks = peak_local_max(result, min_distance=20, threshold_abs=adaptive_threshold)
+detections = [(int(y), int(x), int(template_edges.shape[0]), int(template_edges.shape[1])) for (y, x) in peaks]
 # scaling
-scaled_results = [(int(y/scale_factor), int(x/scale_factor), int(template_edges.shape[0]), int(template_edges.shape[1]))
-                  for (y, x) in peaks]
+# scaled_results = [(int(y/scale_factor), int(x/scale_factor), int(template_edges.shape[0]), int(template_edges.shape[1]))
+#                   for (y, x) in peaks]
 
 
 source_detected = source.copy()
 
-for (y, x, h, w) in scaled_results:
+for (y, x, h, w) in detections:
     rr, cc = rectangle_perimeter((y, x), end=(y+h, x+w), shape=source_detected.shape)
     source_detected[rr, cc] = (255, 0, 0)
 
