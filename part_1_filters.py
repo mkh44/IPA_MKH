@@ -1,4 +1,4 @@
-#part a
+#PART 1A: RESIZING IMAGE
 import numpy as np
 import matplotlib.pyplot as plt
 import skimage as sk
@@ -7,33 +7,27 @@ import PIL as pil
 #correcting image orrientation
 img_pil = pil.Image.open('my_face.jpg')
 img_pil = pil.ImageOps.exif_transpose(img_pil)
-
 img = np.array(img_pil)
-
-
 #resizing image
 img_resized = sk.transform.resize(img, (512, 512), anti_aliasing=True)
-
-#converting to greyscale
-grey_img = sk.color.rgb2gray(img_resized)
-
-#desplaying images
-plt.figure(figsize=(5, 5))
-plt.imshow(img)
-plt.title('Original Image')
-plt.axis('off')
-
+#desplaying image
 plt.figure(figsize=(5, 5))
 plt.imshow(img_resized)
 plt.title('Resized RGB Image')
 plt.axis('off')
 
+
+#PART 1A: GREYSCALE
+#converting to greyscale
+grey_img = sk.color.rgb2gray(img_resized)
+
 plt.figure(figsize=(5, 5))
-plt.imshow(grey_img, cmap='gray')
+plt.imshow(grey_img, cmap='gray', VMIN=0, VMAX=1)
 plt.title('Resized Greyscale Image')
 plt.axis('off')
 plt.show()
 
+#PART 1A: MAX, MIN AND MEAN
 #min, max and mean values
 min_val = np.min(grey_img)
 max_val = np.max(grey_img)
@@ -43,7 +37,7 @@ print(f'min_val: {min_val:.4f}')
 print(f'max_val: {max_val:.4f}')
 print(f'mean_val: {mean_val:.4f}')
 
-#adding GAUSSIAN part b
+#PART 1B: ADDING GAUSSIAN
 noisy_img = sk.util.random_noise(grey_img, mode='gaussian', mean=0.0, var=0.04)
 plt.figure(figsize=(5, 5))
 plt.imshow(noisy_img, cmap='gray')
@@ -51,7 +45,7 @@ plt.title('Greyscale Image with Gaussian Noise')
 plt.axis('off')
 plt.show()
 
-#part c
+#PART 1C: EDGE DETECTORS
 #apply sobel edge detector
 edges_sobel = sk.filters.sobel(noisy_img)
 
