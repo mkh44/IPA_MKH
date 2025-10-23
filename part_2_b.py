@@ -43,6 +43,17 @@ scaled_results = [(int(y/scale_factor), int(x/scale_factor), int(template_edges.
 
 source_detected = source.copy()
 
+for (y, x, h, w) in scaled_results:
+    rr, cc = rectangle_perimeter((y, x), end=(y+h, x+w), shape=source_detected.shape)
+    source_detected[rr, cc] = (255, 0, 0)
+
+
+fig, ax = plt.subplots(1, figsize=(15, 6))
+plt.imshow(source_detected)
+plt.title(f"All Detections (threshold={adaptive_threshold:.2f})")
+plt.axis('off')
+plt.show()
+
 
 
 
