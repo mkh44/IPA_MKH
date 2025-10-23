@@ -23,23 +23,23 @@ template_edges = feature.canny(template_norm, sigma=2)
 
 #rotation invariance
 angles = np.arange(0, 360, 15) #checking every 15 degrees
-best_score = -np.inf
-best_match = None
-best_angle = None
+best_score = []
+threshold = 0.3
 
 for angle in angles:
-    rotated = sk.transform.rotate(source_smooth, angle, resize=True)
-    result = sk.feature.match_template(rotated, template_smooth, pad_input=True)
+    rotated_template = transform.rotate(template_norm, angle, resize=True)
+    result = feature.match_template(source_norm, rotated_template)
     score = np.max(result)
 
-    if score > best_score:
-        best_score = score
-        best_angle = angle
-        best_match = result
+    #peaks
+    match_indices = np.where(result >= threshold)
+    for (y, x) in zip(*match_indices):
+        score = result[y, x]
+        best_score.append((y, x, rotated_template.shape[0], rotated_template.shape[1], score))
 
-#find match location
-ij = np.unravel_index(np.argmax(best_match), best_match.shape)
-x, y, = ij[::-1]
+source_detected = source.copy()
+
+
 
 #find threshold from mean + k*std
 threshold = np.mean(best_match) + 2 * np.std(best_match)
