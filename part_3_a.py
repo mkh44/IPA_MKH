@@ -31,15 +31,15 @@ binary_cleaned = morphology.remove_small_holes(binary_cleaned, area_threshold=10
 distance = ndi.distance_transform_edt(binary_cleaned)
 
 #local max and min
-footprint_size = int((np.clip(np.mean(img_eq.shape) / 50, 3, 25)))
-if footprint_size % 2 == 0:
-    footprint_size += 1
-footprint = np.ones((footprint_size, footprint_size), dtype=bool)
+window_size = max(3, int(min(img_eq.shape) / 50))
+if window_size % 2 == 0:
+    window_size += 1
 
-local_max = morphology.local_maxima(distance, footprint=footprint)
+local_max = (distance == ndi.maximum_filter(distance, size=window_size))
+local_max[binary_cleaned == 0] = False
 
 markers, _ = ndi.label(local_max)
-labels = morphology.watershed(-distance, markers, mask=binary_cleaned)
+labels = segmentation.watershed(-distance, markers, mask=binary_cleaned)
 
 #remove boundary touching objects
 labels_no_border = segmentation.clear_border(labels)
