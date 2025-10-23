@@ -22,7 +22,7 @@ source_edges = feature.canny(source_grey, sigma=2)
 template_edges = feature.canny(template_grey, sigma=2)
 
 #speed
-scale_factor = 0.3
+scale_factor = 0.9
 source_edges_small = transform.rescale(source_edges, scale_factor, anti_aliasing=False)
 template_edges_small = transform.rescale(template_edges, scale_factor, anti_aliasing=False)
 
