@@ -30,7 +30,7 @@ template_edges_small = transform.rescale(template_edges, scale_factor, anti_alia
 result = match_template(source_edges_small, template_edges_small)
 
 # adaptive threshold selection
-all_scores = result.ravel()
+all_scores = np.ravel(result)
 adaptive_threshold = np.mean(all_scores) + 2 * np.std(all_scores)
 
 # peak detection
