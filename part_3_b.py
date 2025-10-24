@@ -65,6 +65,13 @@ print(f"Largest cell centroid: (x={centroid_x:.2f}, y={centroid_y:.2f})")
 highlight = img_resized.copy()
 mask = (labels_no_border == largest_label)
 
+contour = morphology.binary_dilation(mask) ^ mask
+highlight[contour] = [1, 0, 0] # red box
+
+#marking centroid
+cy, cx = int(centroid_y), int(centroid_x)
+highlight[cy-3:cy+4, cx-3:cx+4] = [0, 1, 0] #green cross
+
 #plotting
 plt.figure(figsize=(10, 10))
 plt.imshow(color.label2rgb(labels_no_border, bg_label=0))
