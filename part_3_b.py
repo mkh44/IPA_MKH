@@ -61,6 +61,10 @@ centroid_y, centroid_x = largest_region.centroid
 print(f"Largest cell area: {largest_area:.2f} pixels")
 print(f"Largest cell centroid: (x={centroid_x:.2f}, y={centroid_y:.2f})")
 
+#highlighting
+highlight = img_resized.copy()
+mask = (labels_no_border == largest_label)
+
 #plotting
 plt.figure(figsize=(10, 10))
 plt.imshow(color.label2rgb(labels_no_border, bg_label=0))
