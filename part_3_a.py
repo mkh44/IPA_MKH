@@ -1,7 +1,7 @@
 #PART 3A
 import numpy as np
 import matplotlib.pyplot as plt
-from skimage import io, color, filters, morphology, exposure, transform, measure, segmentation
+from skimage import io, color, filters, feature, morphology, exposure, transform, measure, segmentation
 from scipy import ndimage as ndi
 
 # load and resize
@@ -19,13 +19,17 @@ img_eq = exposure.equalize_adapthist(img_grey, clip_limit=0.03)
 sigma = max(1, (min(img_eq.shape) / 512) * 1.5)
 img_smooth = filters.gaussian(img_eq, sigma=sigma)
 
+#edges
+edges = feature.canny(img_smooth)
+plt.imshow(edges)
+
 #thresholding
 threshold_value = filters.threshold_otsu(img_smooth)
 binary = img_smooth > threshold_value
 
 #remove small noise and fill small holes
-binary_cleaned = morphology.remove_small_objects(binary, min_size=50)
-binary_cleaned = morphology.remove_small_holes(binary_cleaned, area_threshold=100)
+binary_cleaned = ndi.binary_fill_holes(binary)
+
 
 selem = morphology.disk(max(1, int(min(img_eq.shape) / 200)))
 binary_cleaned = morphology.opening(binary_cleaned, selem)
