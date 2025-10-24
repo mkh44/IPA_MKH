@@ -66,16 +66,17 @@ highlight = img_resized.copy()
 mask = (labels_no_border == largest_label)
 
 contour = morphology.binary_dilation(mask) ^ mask
-highlight[contour] = [1, 0, 0] # red box
+highlight[contour] = [1, 0, 0] # red highlight
 
 #marking centroid
 cy, cx = int(centroid_y), int(centroid_x)
-highlight[cy-3:cy+4, cx-3:cx+4] = [0, 1, 0] #green cross
+highlight[cy-4:cy+5, cx-1:cx+2] = [1, 0, 0] #cross
+highlight[cy-1:cy+2, cx-4:cx+5] = [1, 0, 0]
 
 #plotting
 plt.figure(figsize=(8, 6))
 plt.imshow(highlight)
-plt.title(f'Largest HeLa Cell\nArea = {largest_area:.0f} px^2) | Centroid = ({centroid_x:.1f}, {centroid_y:.1f})')
+plt.title(f'Largest HeLa Cell\nArea = {largest_area:.0f} px$^2$), Centroid = ({centroid_x:.1f}, {centroid_y:.1f})')
 plt.axis('off')
 plt.tight_layout()
 plt.show()
