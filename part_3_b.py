@@ -73,9 +73,9 @@ cy, cx = int(centroid_y), int(centroid_x)
 highlight[cy-3:cy+4, cx-3:cx+4] = [0, 1, 0] #green cross
 
 #plotting
-plt.figure(figsize=(10, 10))
-plt.imshow(color.label2rgb(labels_no_border, bg_label=0))
-plt.title(f'Final Segmentation (Count = {cell_count})')
+plt.figure(figsize=(8, 6))
+plt.imshow(highlight)
+plt.title(f'Largest HeLa Cell\nArea = {largest_area:.0f} px^2) | Centroid = ({centroid_x:.1f}, {centroid_y:.1f})')
 plt.axis('off')
 plt.tight_layout()
 plt.show()
