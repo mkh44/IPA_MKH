@@ -52,6 +52,15 @@ cell_count = len(regions)
 
 print(f"Total number of HeLa cells (excluding boundary cells): {cell_count}")
 
+#sizes
+largest_region = max(regions, key=lambda r: r.area)
+largest_label = largest_region.label
+largest_area = largest_region.area
+centroid_y, centroid_x = largest_region.centroid
+
+print(f"Largest cell area: {largest_area:.2f} pixels")
+print(f"Largest cell centroid: (x={centroid_x:.2f}, y={centroid_y:.2f})")
+
 #plotting
 plt.figure(figsize=(10, 10))
 plt.imshow(color.label2rgb(labels_no_border, bg_label=0))
