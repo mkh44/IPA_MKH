@@ -30,26 +30,15 @@ binary = img_smooth > threshold_value
 #remove small noise and fill small holes
 binary_cleaned = ndi.binary_fill_holes(binary)
 
-
 selem = morphology.disk(max(1, int(min(img_eq.shape) / 200)))
 binary_cleaned = morphology.opening(binary_cleaned, selem)
+
 #separate touching cells
 distance = ndi.distance_transform_edt(binary_cleaned)
-
 smooth_sigma = max(1, int(min(img_eq.shape) / 300))
 distance_smooth = filters.gaussian(distance, sigma=smooth_sigma)
-
 h_value = 0.4 * np.std(distance_smooth)
 distance_hmax = morphology.h_maxima(distance_smooth, h=h_value)
-
-#local max and min
-# window_size = max(3, int(min(img_eq.shape) / 50))
-# if window_size % 2 == 0:
-#     window_size += 1
-
-# local_max = (distance == ndi.maximum_filter(distance, size=window_size))
-# local_max[binary_cleaned == 0] = False
-
 markers, _ = ndi.label(distance_hmax)
 labels = segmentation.watershed(-distance_smooth, markers, mask=binary_cleaned)
 
