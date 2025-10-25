@@ -59,10 +59,9 @@ best_angle = 0
 all_detections = []
 
 for angle in angles:
-    rotated_template = rotate(template_edges, angle, resize=True)
-
+    rotated_template = rotate(template_combined, angle, resize=True)
     # template matching
-    result = match_template(source_combined, rotate(template_combined, angle, resize=True))
+    result = match_template(source_combined,rotated_template)
 
     adaptive_threshold = np.mean(result) + 2.5 * np.std(result)
 
@@ -70,6 +69,13 @@ for angle in angles:
 
     for (y, x) in peaks:
         all_detections.append((int(y), int(x), int(rotated_template.shape[0]), int(rotated_template.shape[1]), angle))
+
+filtered_detections = []
+for det in all_detections:
+    y, x, h, w, angle = det
+    if not any(abs(y - fy) < h / 2 and abs(x - fx) < w / 2 for fy, fx, _, _, _ in filtered_detections):
+        filtered_detections.append(det)
+    all_detections = filtered_detections
 
 source_detected = source.copy()
 
