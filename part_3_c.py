@@ -176,6 +176,8 @@ def run_rotation_experiment(image_path, angles=np.arange(0, 360, 10), resize_sha
                 "centroid_disp_median": centroid_disp_median,
                 "area_ratio_mean": area_ratio_mean
             })
+            df = pd.DataFrame(results)
+    print(df[['angle', 'count_rot', 'mean_iou', 'centroid_disp_median']].head())
 
     print(f"Angle {angle:3d}°: count={count_rot:3d}, Δ={count_rot - count_ref:3d}, meanIoU={mean_iou:.3f}, matched={matched}")
 
