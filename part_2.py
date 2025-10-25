@@ -24,7 +24,7 @@ template_edges = feature.canny(template_grey, sigma=2)
 #rotation invariance
 angles = np.arange(0, 360, 15) #checking every 15 degrees
 best_score = []
-threshold = 0.3
+threshold = 0.15
 
 for angle in angles:
     rotated_template = transform.rotate(template_edges, angle, resize=True)

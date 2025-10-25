@@ -71,7 +71,7 @@ for angle in angles:
     # template matching
     result = match_template(source_edges, rotated_template)
 
-    adaptive_threshold = np.percentile(result, 95) # Use 95th percentile as threshold
+    adaptive_threshold = np.percentile(result, 95) # using 95th percentile as threshold
 
     peaks = peak_local_max(result, min_distance=adaptive_min_distance, threshold_abs=adaptive_threshold)
 
