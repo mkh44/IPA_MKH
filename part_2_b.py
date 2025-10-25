@@ -16,6 +16,9 @@ template = io.imread('avian_blood_template.jpg')
 source_grey = color.rgb2gray(source)
 template_grey = color.rgb2gray(template)
 
+source_grey = exposure.equalize_hist(source_grey)
+template_grey = exposure.equalize_hist(template_grey)
+
 #making sure image is interpreted as 2D
 source_grey = np.atleast_2d(source_grey)
 template_grey = np.atleast_2d(template_grey)
@@ -25,39 +28,32 @@ template_grey = np.atleast_2d(template_grey)
 source_clip_limit = 0.005 * source_grey.size / 255
 template_clip_limit = 0.005 * template_grey.size / 255
 
-#estemated noise level (median abs more robust than std)
-source_noise = median_abs_deviation(source_grey.flatten())
-template_noise = median_abs_deviation(template_grey.flatten())
-
-source_noise = np.atleast_2d(source_noise)
-template_noise = np.atleast_2d(template_noise)
-
-canny_noise_sigma_source = restoration.estimate_sigma(source_noise, channel_axis=None)
-canny_sigma_source = np.clip(3.0 * canny_noise_sigma_source * 255, 0.5, 3.0)
-
-canny_noise_sigma_template = restoration.estimate_sigma(template_noise, channel_axis=None)
-canny_sigma_template = np.clip(3.0 * canny_noise_sigma_template * 255, 0.5, 3.0)
-
-min_distance_factor = 0.8
-adaptive_min_distance = int(min(template_grey.shape) * min_distance_factor)
-adaptive_min_distance = max(1, adaptive_min_distance)
-
 #NOISE
 #noise reduction (adaptive)
 source_eq = exposure.equalize_adapthist(source_grey, clip_limit=source_clip_limit,)
 template_eq = exposure.equalize_adapthist(template_grey, clip_limit=template_clip_limit,)
 
+est_sigma_source = restoration.estimate_sigma(source_grey, channel_axis=None)
+sigma_source = np.clip(2.0 * est_sigma_source * 255, 0.5, 3.0)
+
+est_sigma_template = restoration.estimate_sigma(template_grey, channel_axis=None)
+sigma_template = np.clip(2.0 * est_sigma_template * 255, 0.5, 3.0)
+
+min_distance_factor = 0.8
+adaptive_min_distance = int(min(template_grey.shape) * min_distance_factor)
+adaptive_min_distance = max(1, adaptive_min_distance)
+
 
 #edge detection
-source_edges = feature.canny(source_eq, sigma=canny_sigma_source)
-template_edges = feature.canny(template_eq, sigma=canny_sigma_template)
+source_edges = feature.canny(source_eq, sigma=sigma_source)
+template_edges = feature.canny(template_eq, sigma=sigma_template)
 
 #edges + intensities
 source_combined = 0.5 * source_eq + 0.5 * source_edges
 template_combined = 0.5 * template_eq + 0.5 * template_edges
 
 #template matching rotation invariance
-angles = np.arange(0, 360, 10)
+angles = np.arange(0, 360, 45)
 best_result = None
 best_angle = 0
 all_detections = []
@@ -66,9 +62,9 @@ for angle in angles:
     rotated_template = rotate(template_edges, angle, resize=True)
 
     # template matching
-    result = match_template(source_edges, rotated_template)
+    result = match_template(source_combined, rotate(template_combined, angle, resize=True))
 
-    adaptive_threshold = np.percentile(result, 95) # using 95th percentile as threshold
+    adaptive_threshold = np.mean(result) + 2.5 * np.std(result)
 
     peaks = peak_local_max(result, min_distance=adaptive_min_distance, threshold_abs=adaptive_threshold)
 
