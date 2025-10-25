@@ -31,3 +31,15 @@ def segment_cells(image_color, resize_shape=(512,512))
     #otsu thresholding
     threshold = filters.threshold_otsu(img_smooth)
     binary = img_smooth > threshold
+
+    #cleaning
+    min_size = max(20, int(0.0005 * img_smooth.size))
+    binary = morphology.remove_small_objects(binary, min_size=min_size)
+    binary = morphology.remove_small_holes(binary, area_threshold=int(0.0005 * img_smooth.size))
+
+    selem = morphology.disk(max(1, int(min(img_eq.shape) / 200)))
+    binary = morphology.opening(binary, selem)
+
+
+
+
