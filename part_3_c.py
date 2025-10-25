@@ -4,21 +4,26 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from skimage import io, color, filters, morphology, exposure, transform, measure, segmentation
 from skimage.restoration import estimate_sigma
+#import pywavelets as pywt
 from scipy import ndimage as ndi
 from scipy.optimize import linear_sum_assignment
 from skimage.measure import label as sk_label
+import warnings
 
+warnings.filterwarnings('ignore')
 
 # defining segmentation pipeline
 def segment_cells(image_color, resize_shape=(512,512)):
     img = image_color.astype(float)
+    if img.max() > 1:
+        img = img / 255
     if img.ndim == 3:
         img_grey = color.rgb2gray(img)
     else:
         img_grey = img.copy()
 
     if img_grey.shape != resize_shape:
-        img_gray = transform.resize(img_grey, resize_shape, anti_aliasing=True)
+        img_grey = transform.resize(img_grey, resize_shape, anti_aliasing=True)
         img_color = transform.resize(img, resize_shape, anti_aliasing=True)
     else:
         img_color = img.copy()
@@ -111,10 +116,10 @@ def run_rotation_experiment(image_path, angles=np.arange(0, 360, 10), resize_sha
         rotated = transform.rotate(img_orig, angle=angle, resize=False, mode='reflect')
         labels_rot, regions_rot, img_color_rot = segment_cells(rotated, resize_shape=resize_shape)
         count_rot = len(regions_rot)
-        I, pa, pb = iou_matrix(labels_ref, labels_rot)
+        i, pa, pb = iou_matrix(labels_ref, labels_rot)
 
         #compare
-        if I.size == 0:
+        if i.size == 0:
             mean_iou = 0.0
             matched = 0
             centroid_disp_median = np.nan
@@ -122,7 +127,7 @@ def run_rotation_experiment(image_path, angles=np.arange(0, 360, 10), resize_sha
             unmatched_ref = len(pa)
             unmatched_rot = len(pb)
         else:
-            cost = 1.0 - I
+            cost = 1.0 - i
             n, m = cost.shape
             if n > m:
                 cost_pad = np.hstack([cost, np.ones((n, n - m))])
@@ -137,7 +142,7 @@ def run_rotation_experiment(image_path, angles=np.arange(0, 360, 10), resize_sha
             area_ratios = []
             for r, c in zip(row_ind, col_ind):
                 if r < n and c < m:
-                    iou_score = I[r, c]
+                    iou_score = i[r, c]
                     if iou_score > 0.1:
                         matches.append((r, c, iou_score))
                         ious_matched.append(iou_score)
@@ -159,18 +164,18 @@ def run_rotation_experiment(image_path, angles=np.arange(0, 360, 10), resize_sha
             unmatched_ref = max(0, len(pa) - matched)
             unmatched_rot = max(0, len(pb) - matched)
 
-    results.append({
-        "angle": angle,
-        "count_rot": count_rot,
-        "count_ref": count_ref,
-        "count_diff": count_rot - count_ref,
-        "mean_iou": mean_iou,
-        "matched": matched,
-        "unmatched_ref": unmatched_ref,
-        "unmatched_rot": unmatched_rot,
-        "centroid_disp_median": centroid_disp_median,
-        "area_ratio_mean": area_ratio_mean
-    })
+            results.append({
+                "angle": angle,
+                "count_rot": count_rot,
+                "count_ref": count_ref,
+                "count_diff": count_rot - count_ref,
+                "mean_iou": mean_iou,
+                "matched": matched,
+                "unmatched_ref": unmatched_ref,
+                "unmatched_rot": unmatched_rot,
+                "centroid_disp_median": centroid_disp_median,
+                "area_ratio_mean": area_ratio_mean
+            })
 
     print(f"Angle {angle:3d}°: count={count_rot:3d}, Δ={count_rot - count_ref:3d}, meanIoU={mean_iou:.3f}, matched={matched}")
 
@@ -181,24 +186,24 @@ def run_rotation_experiment(image_path, angles=np.arange(0, 360, 10), resize_sha
         axs = axs.ravel()
         axs[0].plot(df.angle, df.count_rot, '-o', label='rotated count')
         axs[0].axhline(df.count_ref.iloc[0], color='k', linestyle='--', label='reference')
-        axs[0].set_title('Cell count vs rotation angle');
-        axs[0].set_xlabel('angle (deg)');
-        axs[0].set_ylabel('count');
+        axs[0].set_title('Cell count vs rotation angle')
+        axs[0].set_xlabel('angle (deg)')
+        axs[0].set_ylabel('count')
         axs[0].legend()
 
-        axs[1].plot(df.angle, df.mean_iou, '-o');
-        axs[1].set_title('Mean IoU (matched regions)');
-        axs[1].set_xlabel('angle (deg)');
+        axs[1].plot(df.angle, df.mean_iou, '-o')
+        axs[1].set_title('Mean IoU (matched regions)')
+        axs[1].set_xlabel('angle (deg)')
         axs[1].set_ylabel('mean IoU')
 
-        axs[2].plot(df.angle, df.centroid_disp_median, '-o');
-        axs[2].set_title('Median centroid displacement (pixels)');
-        axs[2].set_xlabel('angle (deg)');
+        axs[2].plot(df.angle, df.centroid_disp_median, '-o')
+        axs[2].set_title('Median centroid displacement (pixels)')
+        axs[2].set_xlabel('angle (deg)')
         axs[2].set_ylabel('pixels')
 
-        axs[3].plot(df.angle, df.unmatched_rot, '-o', label='unmatched_rot');
-        axs[3].plot(df.angle, df.unmatched_ref, '-o', label='unmatched_ref');
-        axs[3].set_title('Unmatched regions');
+        axs[3].plot(df.angle, df.unmatched_rot, '-o', label='unmatched_rot')
+        axs[3].plot(df.angle, df.unmatched_ref, '-o', label='unmatched_ref')
+        axs[3].set_title('Unmatched regions')
         axs[3].legend()
 
         plt.tight_layout()
