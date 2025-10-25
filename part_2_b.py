@@ -7,6 +7,8 @@ from skimage.draw import rectangle_perimeter
 from skimage.transform import rotate
 from scipy import stats
 from scipy.stats import median_abs_deviation
+from skimage.filters import threshold_otsu
+
 
 #load images
 source = io.imread('avian_blood.jpg')
@@ -40,7 +42,7 @@ est_sigma_template = restoration.estimate_sigma(template_grey, channel_axis=None
 sigma_template = np.clip(2.0 * est_sigma_template * 255, 0.5, 3.0)
 
 min_distance_factor = 0.8
-adaptive_min_distance = int(0.5 * np.mean(template_grey.shape))
+adaptive_min_distance = int(0.6 * np.mean(template_grey.shape))
 adaptive_min_distance = max(1, adaptive_min_distance)
 
 
@@ -53,17 +55,22 @@ source_combined = 0.5 * source_eq + 0.5 * source_edges
 template_combined = 0.5 * template_eq + 0.5 * template_edges
 
 #template matching rotation invariance
-angles = np.arange(0, 360, 45)
+angles = np.arange(0, 360, 10)
 best_result = None
 best_angle = 0
 all_detections = []
 
+t_mask = template_combined > threshold_otsu(template_combined)
+t_mask = t_mask.astype(float)
+
 for angle in angles:
     rotated_template = rotate(template_combined, angle, resize=True)
+    rotated_mask = rotate(t_mask, angle, resize=True) > 0.5
+    rotated_template = rotated_template * rotated_mask
     # template matching
     result = match_template(source_combined,rotated_template)
 
-    adaptive_threshold = np.mean(result) + 2.5 * np.std(result)
+    adaptive_threshold = np.mean(result) + 3 * np.std(result)
 
     peaks = peak_local_max(result, min_distance=adaptive_min_distance, threshold_abs=adaptive_threshold)
 
