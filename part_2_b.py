@@ -40,7 +40,7 @@ est_sigma_template = restoration.estimate_sigma(template_grey, channel_axis=None
 sigma_template = np.clip(2.0 * est_sigma_template * 255, 0.5, 3.0)
 
 min_distance_factor = 0.8
-adaptive_min_distance = int(min(template_grey.shape) * min_distance_factor)
+adaptive_min_distance = int(0.5 * np.mean(template_grey.shape))
 adaptive_min_distance = max(1, adaptive_min_distance)
 
 
