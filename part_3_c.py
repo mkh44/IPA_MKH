@@ -96,4 +96,15 @@ def iou_matrix(labels_a, labels_b):
     return ious, regions_a, regions_b
 
 
-def run_rotation_experiment(image_path, angles=np.arange(0, 360, 10), resize_shape=(512,512), plot_results=True): img_orig = io.imread(image_path)
+def run_rotation_experiment(image_path, angles=np.arange(0, 360, 10), resize_shape=(512,512), plot_results=True):
+    img_orig = io.imread(image_path)
+    labels_ref, regions_ref, img_color_ref = segment_cells(img_orig, resize_shape=resize_shape)
+    count_ref = len(regions_ref)
+    print(f"Reference count (0°): {count_ref}")
+
+    results = []
+    for angle in angles:
+        # rotate image
+        rotated = transform.rotate(img_orig, angle=angle, resize=False, mode='reflect')
+        labels_rot, props_rot, img_color_rot = segment_cells(rotated, resize_shape=resize_shape)
+        count_rot = len(props_rot)
