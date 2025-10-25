@@ -1,5 +1,6 @@
 #PART 3C
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 from skimage import io, color, filters, morphology, exposure, transform, measure, segmentation
 from skimage.restoration import estimate_sigma
@@ -171,3 +172,6 @@ def run_rotation_experiment(image_path, angles=np.arange(0, 360, 10), resize_sha
 
     print(
         f"Angle {angle:3d}°: count={count_rot:3d}, Δ={count_rot - count_ref:3d}, meanIoU={mean_iou:.3f}, matched={matched}")
+
+    #plotting
+
