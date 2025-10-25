@@ -57,3 +57,15 @@ def segment_cells(image_color, resize_shape=(512,512))
 
     return labels_no_border, props_final, img_color
 
+def iou_matrix(labels_a, labels_b):
+    regions_a = measure.regionprops(labels_a)
+    regions_b = measure.regionprops(labels_b)
+    n_a = len(regions_a)
+    n_b = len(regions_b)
+    if n_a == 0 or n_b == 0:
+        return np.zeros((n_a, n_b)), regions_a, regions_b
+
+    la = labels_a.ravel()
+    lb = labels_b.ravel()
+    max_a = labels_a.max()
+    max_b = labels_b.max()
