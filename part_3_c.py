@@ -106,5 +106,68 @@ def run_rotation_experiment(image_path, angles=np.arange(0, 360, 10), resize_sha
     for angle in angles:
         # rotate image
         rotated = transform.rotate(img_orig, angle=angle, resize=False, mode='reflect')
-        labels_rot, props_rot, img_color_rot = segment_cells(rotated, resize_shape=resize_shape)
-        count_rot = len(props_rot)
+        labels_rot, regions_rot, img_color_rot = segment_cells(rotated, resize_shape=resize_shape)
+        count_rot = len(regions_rot)
+        I, pa, pb = iou_matrix(labels_ref, labels_rot)
+
+        #compare
+        if I.size == 0:
+            mean_iou = 0.0
+            matched = 0
+            centroid_disp_median = np.nan
+            area_ratio_mean = np.nan
+            unmatched_ref = len(pa)
+            unmatched_rot = len(pb)
+        else:
+            cost = 1.0 - I
+            n, m = cost.shape
+            if n > m:
+                cost_pad = np.hstack([cost, np.ones((n, n - m))])
+            elif m > n:
+                cost_pad = np.vstack([cost, np.ones((m - n, m))])
+            else:
+                cost_pad = cost
+            row_ind, col_ind = linear_sum_assignment(cost_pad)
+            matches = []
+            ious_matched = []
+            centroid_disps = []
+            area_ratios = []
+            for r, c in zip(row_ind, col_ind):
+                if r < n and c < m:
+                    iou_score = I[r, c]
+                    if iou_score > 0.1:
+                        matches.append((r, c, iou_score))
+                        ious_matched.append(iou_score)
+                        ca = pa[r].centroid
+                        cb = pb[c].centroid
+                        disp = np.sqrt((ca[0] - cb[0]) ** 2 + (ca[1] - cb[1]) ** 2)
+                        centroid_disps.append(disp)
+                        area_ratios.append(pb[c].area / pa[r].area)
+            if len(ious_matched) == 0:
+                mean_iou = 0.0
+                matched = 0
+                centroid_disp_median = np.nan
+                area_ratio_mean = np.nan
+            else:
+                mean_iou = np.mean(ious_matched)
+                matched = len(ious_matched)
+                centroid_disp_median = np.median(centroid_disps)
+                area_ratio_mean = np.mean(area_ratios)
+            unmatched_ref = max(0, len(pa) - matched)
+            unmatched_rot = max(0, len(pb) - matched)
+
+    results.append({
+        "angle": angle,
+        "count_rot": count_rot,
+        "count_ref": count_ref,
+        "count_diff": count_rot - count_ref,
+        "mean_iou": mean_iou,
+        "matched": matched,
+        "unmatched_ref": unmatched_ref,
+        "unmatched_rot": unmatched_rot,
+        "centroid_disp_median": centroid_disp_median,
+        "area_ratio_mean": area_ratio_mean
+    })
+
+    print(
+        f"Angle {angle:3d}°: count={count_rot:3d}, Δ={count_rot - count_ref:3d}, meanIoU={mean_iou:.3f}, matched={matched}")
