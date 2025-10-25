@@ -25,3 +25,9 @@ def segment_cells(image_color, resize_shape=(512,512))
     #noise
     noise_sigma = estimate_sigma(img_eq, channel_axis=None)
     sigma = np.clip(2.0 * noise_sigma * 255, 0.5, 3.0)
+
+    img_smooth = filters.gaussian(img_eq, sigma=sigma)
+
+    #otsu thresholding
+    threshold = filters.threshold_otsu(img_smooth)
+    binary = img_smooth > threshold
