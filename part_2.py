@@ -28,26 +28,31 @@ source_edges = feature.canny(source_grey, sigma=sigma_source)
 template_edges = feature.canny(template_grey, sigma=sigma_template)
 
 #rotation invariance
-angles = np.arange(0, 360, 15) #checking every 15 degrees
+angles = np.arange(0, 360, 15)
 best_score = []
-threshold = 0.3
+
 
 for angle in angles:
-    rotated_template = transform.rotate(template_edges, angle, resize=True)
+    rotated_template = transform.rotate(template_edges, float(angle), resize=True)
     result = match_template(source_edges, rotated_template)
-    score = np.max(result)
+    threshold = np.mean(result) + 3 * np.std(result)
+    y, x = np.unravel_index(np.argmax(result), result.shape)
+    score = result[y, x]
+    best_score.append((y, x, rotated_template.shape[0], rotated_template.shape[1], score))
 
-    #peaks
-    match_indices = np.where(result >= threshold)
-    for (y, x) in zip(*match_indices):
-        score = result[y, x]
-        best_score.append((y, x, rotated_template.shape[0], rotated_template.shape[1], score))
 
 source_detected = source.copy()
 
 for (y, x, h, w, score) in best_score:
-    rr, cc = rectangle_perimeter((y, x), end=(y+h, x+w), shape=source_detected.shape)
-    source_detected[rr, cc] = (255, 0, 0)#red box thing
+    h, w = rotated_template.shape
+    y1, x1 = int(max(0, y)), int(max(0, x))
+    y2, x2 = int(min(source_detected.shape[0] - 1, y + h)), int(min(source_detected.shape[1] - 1, x + w))
+    if y1 >= y2 or x1 >= x2:
+        continue
+    if y1 <= 0 or x1 <= 0 or y2 >= source_detected.shape[0] - 1 or x2 >= source_detected.shape[1] - 1:
+        continue
+    rr, cc = rectangle_perimeter((y1, x1), end=(y2, x2), shape=source_detected.shape, clip=True)
+    source_detected[rr, cc] = (255, 0, 0)
 
 #plotting
 plt.figure(figsize=(8, 6))
