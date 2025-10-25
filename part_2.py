@@ -1,7 +1,7 @@
 #PART 2A
 import numpy as np
 import matplotlib.pyplot as plt
-from skimage import io, color, feature, transform, exposure
+from skimage import io, color, feature, transform, exposure, restoration
 from skimage.feature import match_template
 from skimage.draw import rectangle_perimeter
 
@@ -17,14 +17,20 @@ template_grey = color.rgb2gray(template)
 source_grey = exposure.equalize_hist(source_grey)
 template_grey = exposure.equalize_hist(template_grey)
 
+est_sigma_source = restoration.estimate_sigma(source_grey, channel_axis=None)
+sigma_source = np.clip(3.0 * est_sigma_source * 255, 0.5, 3.0)
+
+est_sigma_template = restoration.estimate_sigma(template_grey, channel_axis=None)
+sigma_template = np.clip(3.0 * est_sigma_template * 255, 0.5, 3.0)
+
 #edge detection
-source_edges = feature.canny(source_grey, sigma=2)
-template_edges = feature.canny(template_grey, sigma=2)
+source_edges = feature.canny(source_grey, sigma=sigma_source)
+template_edges = feature.canny(template_grey, sigma=sigma_template)
 
 #rotation invariance
 angles = np.arange(0, 360, 15) #checking every 15 degrees
 best_score = []
-threshold = 0.15
+threshold = 0.3
 
 for angle in angles:
     rotated_template = transform.rotate(template_edges, angle, resize=True)

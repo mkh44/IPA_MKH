@@ -16,7 +16,7 @@ template = io.imread('avian_blood_template.jpg')
 source_grey = color.rgb2gray(source)
 template_grey = color.rgb2gray(template)
 
-#making sure source_noise is interpreted as 2D
+#making sure image is interpreted as 2D
 source_grey = np.atleast_2d(source_grey)
 template_grey = np.atleast_2d(template_grey)
 
@@ -29,14 +29,8 @@ template_clip_limit = 0.005 * template_grey.size / 255
 source_noise = median_abs_deviation(source_grey.flatten())
 template_noise = median_abs_deviation(template_grey.flatten())
 
-
-
-#sigma for gaussian filter. set as proportional to noise level
-gaussian_noise_sigma_source = restoration.estimate_sigma(source_noise, channel_axis=None)
-gaussian_sigma_source = np.clip(2.0 * gaussian_noise_sigma_source * 255, 0.5, 3.0)
-
-gaussian_noise_sigma_template = restoration.estimate_sigma(template_noise, channel_axis=None)
-gaussian_sigma_template = np.clip(2.0 * gaussian_noise_sigma_template * 255, 0.5, 3.0)
+source_noise = np.atleast_2d(source_noise)
+template_noise = np.atleast_2d(template_noise)
 
 canny_noise_sigma_source = restoration.estimate_sigma(source_noise, channel_axis=None)
 canny_sigma_source = np.clip(3.0 * canny_noise_sigma_source * 255, 0.5, 3.0)
@@ -53,13 +47,10 @@ adaptive_min_distance = max(1, adaptive_min_distance)
 source_eq = exposure.equalize_adapthist(source_grey, clip_limit=source_clip_limit,)
 template_eq = exposure.equalize_adapthist(template_grey, clip_limit=template_clip_limit,)
 
-#gaussian noise reduction
-source_smooth = filters.gaussian(source_eq, sigma=gaussian_sigma_source)
-template_smooth = filters.gaussian(template_eq, sigma=gaussian_sigma_template)
 
 #edge detection
-source_edges = feature.canny(source_smooth, sigma=canny_sigma_source)
-template_edges = feature.canny(template_smooth, sigma=canny_sigma_template)
+source_edges = feature.canny(source_eq, sigma=canny_sigma_source)
+template_edges = feature.canny(template_eq, sigma=canny_sigma_template)
 
 #edges + intensities
 source_combined = 0.5 * source_eq + 0.5 * source_edges
