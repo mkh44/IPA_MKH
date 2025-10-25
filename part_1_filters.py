@@ -69,7 +69,7 @@ plt.axis('off')
 plt.show()
 
 #CANNY
-edges_canny = sk.feature.canny(noisy_img, low_threshold=0.05, high_threshold=0.15)
+edges_canny = sk.feature.canny(noisy_img, low_threshold=0.1, high_threshold=0.15)
 edges_canny = edges_canny.astype(np.uint8)
 
 plt.figure(figsize=(5, 5))
