@@ -69,3 +69,28 @@ def iou_matrix(labels_a, labels_b):
     lb = labels_b.ravel()
     max_a = labels_a.max()
     max_b = labels_b.max()
+
+    pairs = la.astype(np.int64) * (max_b + 1) + lb.astype(np.int64)
+    vals, counts = np.unique(pairs, return_counts=True)
+
+    # decode
+    ious = np.zeros((n_a, n_b), dtype=float)
+    area_a = np.array([p.area for p in regions_a])
+    area_b = np.array([p.area for p in regions_b])
+
+    label_to_idx_a = {p.label: idx for idx, p in enumerate(regions_a)}
+    label_to_idx_b = {p.label: idx for idx, p in enumerate(regions_b)}
+    for val, cnt in zip(vals, counts):
+        la_val = val // (max_b + 1)
+        lb_val = val % (max_b + 1)
+        if la_val == 0 or lb_val == 0:
+            continue
+        ia = label_to_idx_a.get(la_val, None)
+        ib = label_to_idx_b.get(lb_val, None)
+        if ia is None or ib is None:
+            continue
+        inter = cnt
+        union = area_a[ia] + area_b[ib] - inter
+        if union > 0:
+            ious[ia, ib] = inter / union
+    return ious, regions_a, regions_b
