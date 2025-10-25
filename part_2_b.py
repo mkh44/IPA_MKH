@@ -1,7 +1,7 @@
 #PART 2B
 import numpy as np
 import matplotlib.pyplot as plt
-from skimage import io, color, feature, transform, exposure, filters
+from skimage import io, color, feature, transform, exposure, filters, restoration
 from skimage.feature import match_template, peak_local_max
 from skimage.draw import rectangle_perimeter
 from skimage.transform import rotate
@@ -16,21 +16,33 @@ template = io.imread('avian_blood_template.jpg')
 source_grey = color.rgb2gray(source)
 template_grey = color.rgb2gray(template)
 
+#making sure source_noise is interpreted as 2D
+source_grey = np.atleast_2d(source_grey)
+template_grey = np.atleast_2d(template_grey)
+
 #PARAMETERS FROM IMAGE
 #adaptive clip lim form img size
-source_clip_limit = 0.005 * source_grey.size / 256
-template_clip_limit = 0.005 * template_grey.size / 256
+source_clip_limit = 0.005 * source_grey.size / 255
+template_clip_limit = 0.005 * template_grey.size / 255
 
-#estemated noise level (median abs more robust than std
+#estemated noise level (median abs more robust than std)
 source_noise = median_abs_deviation(source_grey.flatten())
 template_noise = median_abs_deviation(template_grey.flatten())
 
-#sigma for gaussian filter. set as proportional to noise level
-gaussian_sigma_source = max(1, int(source_noise * 2))
-gaussian_sigma_template = max(1, int(template_noise * 2))
 
-canny_sigma_source = max(1, int(source_noise * 3))
-canny_sigma_template = max(1, int(template_noise * 3))
+
+#sigma for gaussian filter. set as proportional to noise level
+gaussian_noise_sigma_source = restoration.estimate_sigma(source_noise, channel_axis=None)
+gaussian_sigma_source = np.clip(2.0 * gaussian_noise_sigma_source * 255, 0.5, 3.0)
+
+gaussian_noise_sigma_template = restoration.estimate_sigma(template_noise, channel_axis=None)
+gaussian_sigma_template = np.clip(2.0 * gaussian_noise_sigma_template * 255, 0.5, 3.0)
+
+canny_noise_sigma_source = restoration.estimate_sigma(source_noise, channel_axis=None)
+canny_sigma_source = np.clip(3.0 * canny_noise_sigma_source * 255, 0.5, 3.0)
+
+canny_noise_sigma_template = restoration.estimate_sigma(template_noise, channel_axis=None)
+canny_sigma_template = np.clip(3.0 * canny_noise_sigma_template * 255, 0.5, 3.0)
 
 min_distance_factor = 0.8
 adaptive_min_distance = int(min(template_grey.shape) * min_distance_factor)
@@ -52,12 +64,6 @@ template_edges = feature.canny(template_smooth, sigma=canny_sigma_template)
 #edges + intensities
 source_combined = 0.5 * source_eq + 0.5 * source_edges
 template_combined = 0.5 * template_eq + 0.5 * template_edges
-
-
-#speed
-# scale_factor = 0.9
-# source_edges_small = transform.rescale(source_edges, scale_factor, anti_aliasing=False)
-# template_edges_small = transform.rescale(template_edges, scale_factor, anti_aliasing=False)
 
 #template matching rotation invariance
 angles = np.arange(0, 360, 10)
