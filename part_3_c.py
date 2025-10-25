@@ -94,3 +94,6 @@ def iou_matrix(labels_a, labels_b):
         if union > 0:
             ious[ia, ib] = inter / union
     return ious, regions_a, regions_b
+
+
+def run_rotation_experiment(image_path, angles=np.arange(0, 360, 10), resize_shape=(512,512), plot_results=True): img_orig = io.imread(image_path)
