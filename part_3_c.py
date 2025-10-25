@@ -8,8 +8,10 @@ from scipy import ndimage as ndi
 from scipy.optimize import linear_sum_assignment
 from skimage.measure import label as sk_label
 
+
 # defining segmentation pipeline
-def segment_cells(image_color, resize_shape=(512,512))
+def segment_cells(image_color, resize_shape=(512,512)):
+    img = image_color.astype(float)
     if img.ndim == 3:
         img_grey = color.rgb2gray(img)
     else:
@@ -170,8 +172,43 @@ def run_rotation_experiment(image_path, angles=np.arange(0, 360, 10), resize_sha
         "area_ratio_mean": area_ratio_mean
     })
 
-    print(
-        f"Angle {angle:3d}°: count={count_rot:3d}, Δ={count_rot - count_ref:3d}, meanIoU={mean_iou:.3f}, matched={matched}")
+    print(f"Angle {angle:3d}°: count={count_rot:3d}, Δ={count_rot - count_ref:3d}, meanIoU={mean_iou:.3f}, matched={matched}")
 
     #plotting
+    df = pd.DataFrame(results)
+    if plot_results:
+        fig, axs = plt.subplots(2, 2, figsize=(12, 8))
+        axs = axs.ravel()
+        axs[0].plot(df.angle, df.count_rot, '-o', label='rotated count')
+        axs[0].axhline(df.count_ref.iloc[0], color='k', linestyle='--', label='reference')
+        axs[0].set_title('Cell count vs rotation angle');
+        axs[0].set_xlabel('angle (deg)');
+        axs[0].set_ylabel('count');
+        axs[0].legend()
+
+        axs[1].plot(df.angle, df.mean_iou, '-o');
+        axs[1].set_title('Mean IoU (matched regions)');
+        axs[1].set_xlabel('angle (deg)');
+        axs[1].set_ylabel('mean IoU')
+
+        axs[2].plot(df.angle, df.centroid_disp_median, '-o');
+        axs[2].set_title('Median centroid displacement (pixels)');
+        axs[2].set_xlabel('angle (deg)');
+        axs[2].set_ylabel('pixels')
+
+        axs[3].plot(df.angle, df.unmatched_rot, '-o', label='unmatched_rot');
+        axs[3].plot(df.angle, df.unmatched_ref, '-o', label='unmatched_ref');
+        axs[3].set_title('Unmatched regions');
+        axs[3].legend()
+
+        plt.tight_layout()
+        plt.show()
+
+    return df, labels_ref
+
+
+if __name__ == "__main__":
+    image_path = "HeLa_cells.jpg"
+    angles = np.arange(0, 360, 10)  # test every 10 degrees
+    df, labels_ref = run_rotation_experiment(image_path, angles=angles, resize_shape=(512,512), plot_results=True)
 
