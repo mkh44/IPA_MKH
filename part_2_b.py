@@ -56,46 +56,37 @@ template_combined = 0.5 * template_eq + 0.5 * template_edges
 
 #template matching rotation invariance
 angles = np.arange(0, 360, 10)
-best_result = None
+best_result = []
 best_angle = 0
-all_detections = []
 
-t_mask = template_combined > threshold_otsu(template_combined)
-t_mask = t_mask.astype(float)
 
 for angle in angles:
-    rotated_template = rotate(template_combined, angle, resize=True)
-    rotated_mask = rotate(t_mask, angle, resize=True) > 0.5
-    rotated_template = rotated_template * rotated_mask
-    # template matching
-    result = match_template(source_combined,rotated_template)
+    rotated_template = transform.rotate(template_edges, float(angle), resize=True)
+    result = match_template(source_edges, rotated_template)
+    threshold = np.mean(result) + 3 * np.std(result)
+    y, x = np.unravel_index(np.argmax(result), result.shape)
+    score = result[y, x]
+    best_result.append((y, x, rotated_template.shape[0], rotated_template.shape[1], score))
 
-    adaptive_threshold = np.mean(result) + 3 * np.std(result)
-
-    peaks = peak_local_max(result, min_distance=adaptive_min_distance, threshold_abs=adaptive_threshold)
-
-    for (y, x) in peaks:
-        all_detections.append((int(y), int(x), int(rotated_template.shape[0]), int(rotated_template.shape[1]), angle))
-
-filtered_detections = []
-for det in all_detections:
-    y, x, h, w, angle = det
-    if not any(abs(y - fy) < h / 2 and abs(x - fx) < w / 2 for fy, fx, _, _, _ in filtered_detections):
-        filtered_detections.append(det)
-    all_detections = filtered_detections
 
 source_detected = source.copy()
 
-for (y, x, h, w, angle) in all_detections:
-    rr, cc = rectangle_perimeter((y, x), end=(y+h, x+w), shape=source_detected.shape)
+for (y, x, h, w, score) in best_result:
+    h, w = rotated_template.shape
+    y1, x1 = int(max(0, y)), int(max(0, x))
+    y2, x2 = int(min(source_detected.shape[0] - 1, y + h)), int(min(source_detected.shape[1] - 1, x + w))
+    if y1 >= y2 or x1 >= x2:
+        continue
+    if y1 <= 0 or x1 <= 0 or y2 >= source_detected.shape[0] - 1 or x2 >= source_detected.shape[1] - 1:
+        continue
+    rr, cc = rectangle_perimeter((y1, x1), end=(y2, x2), shape=source_detected.shape, clip=True)
     source_detected[rr, cc] = (255, 0, 0)
-
 
 
 
 fig, ax = plt.subplots(1, figsize=(8, 6))
 plt.imshow(source_detected)
-plt.title(f"All Detections (threshold={adaptive_threshold:.2f})")
+plt.title(f"All Detections (threshold={threshold:.2f})")
 plt.axis('off')
 plt.tight_layout()
 plt.show()
