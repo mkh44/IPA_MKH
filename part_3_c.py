@@ -40,6 +40,20 @@ def segment_cells(image_color, resize_shape=(512,512))
     selem = morphology.disk(max(1, int(min(img_eq.shape) / 200)))
     binary = morphology.opening(binary, selem)
 
+    distance = ndi.distance_transform_edt(binary)
+    distance_smooth = filters.gaussian(distance, sigma=np.clip(min(img_eq.shape)/400, 1, 2))
+
+    h_value = 0.6 * np.std(distance_smooth)
+    markers = morphology.h_maxima(distance_smooth, h=h_value)
+    markers_labeled, _ = ndi.label(markers)
+
+    labels = segmentation.watershed(-distance_smooth, markers_labeled, mask=binary)
+    labels_no_border = segmentation.clear_border(labels)
 
 
+    labels_no_border = sk_label(labels_no_border > 0)
+
+    props_final = measure.regionprops(labels_no_border)
+
+    return labels_no_border, props_final, img_color
 
