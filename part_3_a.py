@@ -1,7 +1,7 @@
 #PART 3A
 import numpy as np
 import matplotlib.pyplot as plt
-from skimage import io, color, filters, feature, morphology, exposure, transform, measure, segmentation
+from skimage import io, color, filters, feature, morphology, exposure, transform, measure, segmentation, restoration
 from scipy import ndimage as ndi
 
 # load and resize
@@ -16,7 +16,8 @@ img_grey = color.rgb2gray(img_resized)
 img_eq = exposure.equalize_adapthist(img_grey, clip_limit=0.03)
 
 #gaussian
-sigma = max(1, (min(img_eq.shape) / 512) * 1.5)
+noise_sigma = restoration.estimate_sigma(img_eq, channel_axis=None)
+sigma = np.clip(2 * noise_sigma * 255, 0.3, 3)
 img_smooth = filters.gaussian(img_eq, sigma=sigma)
 
 #edges
