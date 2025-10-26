@@ -179,14 +179,6 @@ def run_rotation_experiment(image_path, angles=np.arange(0, 360, 10), resize_sha
         print(f"Angle {angle:3d}°: count={count_rot:3d}, Δ={count_rot - count_ref:3d}, meanIoU={mean_iou:.3f}, matched={matched}")
 
     df = pd.DataFrame(results)
-    df = df.rename(columns={
-            "angle": "Rotation Angle (°)",
-            "count_rot": "Cell Count",
-            "count_diff": "Δ Count",
-            "mean_iou": "Mean IoU",
-            "centroid_disp_median": "Median Centroid Displacement (px)"
-    })
-    print(df)
 
     print(f"Angle {angle:3d}°: count={count_rot:3d}, Δ={count_rot - count_ref:3d}, meanIoU={mean_iou:.3f}, matched={matched}")
 
