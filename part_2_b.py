@@ -55,7 +55,7 @@ source_combined = 0.5 * source_eq + 0.5 * source_edges
 template_combined = 0.5 * template_eq + 0.5 * template_edges
 
 #template matching rotation invariance
-angles = np.arange(0, 360, 10)
+angles = np.arange(0, 360, 15)
 best_result = []
 best_angle = 0
 
