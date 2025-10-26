@@ -220,3 +220,6 @@ if __name__ == "__main__":
     angles = np.arange(0, 360, 10)  # test every 10 degrees
     df, labels_ref = run_rotation_experiment(image_path, angles=angles, resize_shape=(512,512), plot_results=True)
 
+# saving
+output_path = 'rotation_experiment_results.csv'
+df.to_csv(output_path, index=False)
