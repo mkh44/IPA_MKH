@@ -164,25 +164,34 @@ def run_rotation_experiment(image_path, angles=np.arange(0, 360, 10), resize_sha
             unmatched_ref = max(0, len(pa) - matched)
             unmatched_rot = max(0, len(pb) - matched)
 
-            results.append({
-                "angle": angle,
-                "count_rot": count_rot,
-                "count_ref": count_ref,
-                "count_diff": count_rot - count_ref,
-                "mean_iou": mean_iou,
-                "matched": matched,
-                "unmatched_ref": unmatched_ref,
-                "unmatched_rot": unmatched_rot,
-                "centroid_disp_median": centroid_disp_median,
-                "area_ratio_mean": area_ratio_mean
-            })
-            df = pd.DataFrame(results)
-    print(df[['angle', 'count_rot', 'mean_iou', 'centroid_disp_median']].head())
+        results.append({
+            "angle": angle,
+            "count_rot": count_rot,
+            "count_ref": count_ref,
+            "count_diff": count_rot - count_ref,
+            "mean_iou": mean_iou,
+            "matched": matched,
+            "unmatched_ref": unmatched_ref,
+            "unmatched_rot": unmatched_rot,
+            "centroid_disp_median": centroid_disp_median,
+            "area_ratio_mean": area_ratio_mean
+        })
+        print(f"Angle {angle:3d}°: count={count_rot:3d}, Δ={count_rot - count_ref:3d}, meanIoU={mean_iou:.3f}, matched={matched}")
+
+    df = pd.DataFrame(results)
+    df = df.rename(columns={
+            "angle": "Rotation Angle (°)",
+            "count_rot": "Cell Count",
+            "count_diff": "Δ Count",
+            "mean_iou": "Mean IoU",
+            "centroid_disp_median": "Median Centroid Displacement (px)"
+    })
+    print(df)
 
     print(f"Angle {angle:3d}°: count={count_rot:3d}, Δ={count_rot - count_ref:3d}, meanIoU={mean_iou:.3f}, matched={matched}")
 
     #plotting
-    df = pd.DataFrame(results)
+
     if plot_results:
         fig, axs = plt.subplots(2, 2, figsize=(12, 8))
         axs = axs.ravel()

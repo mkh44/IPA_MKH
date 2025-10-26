@@ -13,7 +13,8 @@ img_resized = sk.transform.resize(img, (512, 512), anti_aliasing=True)
 #desplaying image
 plt.figure(figsize=(5, 5))
 plt.imshow(img_resized)
-plt.title('Resized RGB Image')
+plt.title('(a) Resized RGB Image')
+plt.tight_layout()
 plt.axis('off')
 
 
@@ -23,8 +24,9 @@ grey_img = sk.color.rgb2gray(img_resized)
 
 plt.figure(figsize=(5, 5))
 plt.imshow(grey_img, cmap='gray')
-plt.title('Resized Greyscale Image')
+plt.title('(b) Resized Greyscale Image')
 plt.axis('off')
+plt.tight_layout()
 plt.show()
 
 #PART 1A: MAX, MIN AND MEAN
@@ -46,8 +48,9 @@ noisy_img = grey_img + gaussian_noise
 noisy_img = np.clip(noisy_img, 0, 255).astype(np.int8)
 plt.figure(figsize=(5, 5))
 plt.imshow(noisy_img, cmap='gray')
-plt.title('Greyscale Image with Gaussian Noise')
+plt.title('(c) Greyscale Image with Gaussian Noise')
 plt.axis('off')
+plt.tight_layout()
 plt.show()
 
 #PART 1C: EDGE DETECTORS
@@ -56,16 +59,18 @@ plt.show()
 edges_sobel = sk.filters.sobel(noisy_img)
 plt.figure(figsize=(5, 5))
 plt.imshow(edges_sobel, cmap='gray')
-plt.title('Edges Sobel')
+plt.title('(d) Edges Sobel')
 plt.axis('off')
+plt.tight_layout()
 plt.show()
 
 #PREWITT
 edges_prewitt = sk.filters.prewitt(noisy_img)
 plt.figure(figsize=(5, 5))
 plt.imshow(edges_prewitt, cmap='gray')
-plt.title('Edges Prewitt')
+plt.title('(e) Edges Prewitt')
 plt.axis('off')
+plt.tight_layout()
 plt.show()
 
 #CANNY
@@ -74,6 +79,7 @@ edges_canny = edges_canny.astype(np.uint8)
 
 plt.figure(figsize=(5, 5))
 plt.imshow(edges_canny, cmap='gray')
-plt.title('Edges Canny')
+plt.title('(f) Edges Canny')
 plt.axis('off')
+plt.tight_layout()
 plt.show()

@@ -18,10 +18,10 @@ source_grey = exposure.equalize_hist(source_grey)
 template_grey = exposure.equalize_hist(template_grey)
 
 est_sigma_source = restoration.estimate_sigma(source_grey, channel_axis=None)
-sigma_source = np.clip(3.0 * est_sigma_source * 255, 0.5, 3.0)
+sigma_source = np.clip(2.0 * est_sigma_source * 255, 0.5, 3.0)
 
 est_sigma_template = restoration.estimate_sigma(template_grey, channel_axis=None)
-sigma_template = np.clip(3.0 * est_sigma_template * 255, 0.5, 3.0)
+sigma_template = np.clip(2.0 * est_sigma_template * 255, 0.5, 3.0)
 
 #edge detection
 source_edges = feature.canny(source_grey, sigma=sigma_source)
@@ -35,7 +35,7 @@ best_score = []
 for angle in angles:
     rotated_template = transform.rotate(template_edges, float(angle), resize=True)
     result = match_template(source_edges, rotated_template)
-    threshold = np.mean(result) + 3 * np.std(result)
+    threshold = 0.15 #np.mean(result) + 3  * np.std(result)
     y, x = np.unravel_index(np.argmax(result), result.shape)
     score = result[y, x]
     best_score.append((y, x, rotated_template.shape[0], rotated_template.shape[1], score))
